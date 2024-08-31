@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %} Rack Management {% endblock %}
+{% block title1 %} Rack Management {% endblock %}
+{% block content %}
+
+
+
+<script>
+    $(document).ready(function() {
+        $('#table').DataTable();
+    });
+</script>
+
+<style>
+    body {
+        background-color: var(--body-color);
+    }
+
+    td {
+        text-align: left;
+    }
+</style>
+
+<div class="container-fluid" style="padding: 20px;">
+    <div class="card border p-5 m-2">
+        <div class="row">
+            <div class="col-12">
+
+                {%with messages = get_flashed_messages(with_categories=true)%}
+                    {%if messages%}
+                        {% for category, context in messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{context}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        {%endfor%}
+                    {%endif%}
+                {%endwith%}
+
+
+               
+
+                
+
+                <div class="w-100 d-flex justify-content-between table-header-btn ">
+                    <div class="d-flex" style="gap:15px">
+                    </div>
+                    <button class="btn btn-primary" id="modal_btn_add_rack"><i class="fa-solid fa-plus"></i> Add New
+                        Rack</button>
+                </div>
+                <br>
+                <table id="table" class="table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Rack</th>
+                            <th>Date Created</th>
+                            <th>Date update</th>
+                            <th width="50">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                        {% for row in rack %}
+                        <tr>
+
+                            <td>{{row.1}}</td>
+                            <td>{{row.2}}</td>
+                            <td>{{row.3}}</td>
+                            <td>
+                                <div class="dropdown">
+
+                                    <i class="dropdown-toggle fa-solid fa-gears" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    </i>
+                                    <ul class="dropdown-menu">
+
+
+                                        <li> <a class="dropdown-item update" href="#" role="button" data-rack_id="{{row.0}}" data-cat_desc="{{row.1}}">Update</a></li>
+                                        <li><a class="dropdown-item delete" href="#" data-rack_id="{{row.0}}">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {%endfor%}
+                      
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<div class="modal fade" id="rack_form_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="" id="modal_title">Add New Rack</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rack_form"  action="{{ url_for('insertRack')}}" method="post">
+         
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Rack: </label>
+                                            <input type="text" class="form-control" id="title" name="title" required placeholder="Enter rack..." />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="padding:0 0 20px 0;">
+                                    <div class="row justify-content-end">
+                                        <div class="col-12 text-end">
+                                            <input type="submit" class="btn btn-primary" id="modal_add_submit" value="Add Rack">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="update_rack_form_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="" id="modal_title">Update Rack</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update_rack_form" action="{{ url_for('updateRack')}}" method="post">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Rack: </label>
+                                            <input type="hidden" class="form-control" id="rack_id" name="rack_id" />
+                                            <input type="text" class="form-control" id="title1" name="title1" required placeholder="Enter rack..." />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="padding:0 0 20px 0;">
+                                    <div class="row justify-content-end">
+                                        <div class="col-12 text-end">
+                                            <input type="submit" class="btn btn-primary" id="modal_add_submit" value="Update Rack">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#modal_btn_add_rack').click(function(e) {
+        $('#rack_form_modal').modal('show');
+
+    });
+
+
+    $(document).ready(function() {
+        $(document).on('click', '.update', function() {
+
+            $('#update_rack_form_modal').modal('show');
+
+            var id = $(this).data('rack_id');
+            var desc = $(this).data('cat_desc');
+            $('#rack_id').val(id);
+            $('#title1').val(desc);
+
+        });
+    });
+
+
+
+    $(document).on('click', '.delete', function() {
+        var id = $(this).data('rack_id');
+    
+        swal({
+            title: "Delete rack?",
+            text: "Are you sure you want to delete rack? ",
+            icon: "warning",
+            buttons: {
+                cancel: "Cancel",
+                yes: {
+                    text: "Yes",
+                    value: "yes",
+                },
+            },
+        }).then((value) => {
+            if (value === "yes") {
+                $.ajax({
+                    type: "POST",
+                    url: "/deleteRack/" + id, // Specify the correct URL
+                    success: function(response) {
+                        if (response.code == 200) {
+                            swal({
+                                icon: "success",
+                                title: 'Rack Successfully Deleted',
+                                text: " ",
+                                timer: 2000,
+                                showConfirmButton: false,
+                            }).then(function() {
+                                window.location.href = "/rack"; // Specify the correct URL
+                            });
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        alert("Error deleting rack");
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    });
+    
+</script>
+
+{% endblock %}

@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+
+{% block title %} Books Management {% endblock %}
+{% block title1 %} Books Management {% endblock %}
+{% block content %}
+
+
+
+<script>
+    $(document).ready(function() {
+        $('#table').DataTable();
+    });
+</script>
+
+<style>
+    body {
+        background-color: var(--body-color);
+    }
+
+    td {
+        text-align: left;
+    }
+
+    
+</style>
+
+<div class="container-fluid" style="padding: 20px;">
+    <div class="card border p-5 m-2">
+        <div class="row">
+            <div class="col-12">
+
+                {%with messages = get_flashed_messages(with_categories=true)%}
+                    {%if messages%}
+                        {% for category, context in messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{context}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        {%endfor%}
+                    {%endif%}
+                {%endwith%}
+
+
+               
+
+                
+
+                <div class="w-100 d-flex justify-content-between table-header-btn ">
+                    <div class="d-flex" style="gap:15px">
+                    </div>
+                    <button class="btn btn-primary" id="modal_btn_add_rack"><i class="fa-solid fa-plus"></i> Add Book </button>
+                </div>
+                <br>
+                <table id="table" class="table" style="width:100%; ">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>ISBN</th>
+                            <th>Author</th>	
+                            <th>Publisher</th>	
+                            <th>Category</th>	
+                            <th>Rack</th>
+                            <th>No of copy</th>						
+                            <th>Qty. Borrowed</th>
+                            <th>Status</th>		
+                            <th width="50">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                        {% for row in books %}
+                        <tr>
+
+                            <td>{{row.1}}</td>
+                            <td>{{row.2}}</td>
+                            <td>{{row.3}}</td>
+                            <td>{{row.4}}</td>
+                            <td>{{row.11}}</td>
+                            <td>{{row.12}}</td>
+                            <td>{{row.7}}</td>
+                           
+                            <td>{{row.13}}</td>
+                            <td> 
+                                {%if row.7 <= row.13%}
+                                Out of Stock
+                                {%elif row.8 == 1%}
+                                    Available
+                                {%elif row.8 == 2%}
+                                    Archive
+                            
+                                    {%endif%}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+
+                                    <i class="dropdown-toggle fa-solid fa-gears" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    </i>
+                                    <ul class="dropdown-menu">
+
+
+                                        <li> <a class="dropdown-item update" href="#" role="button" data-book_id="{{row.0}}" data-name="{{row.1}}" data-isbn="{{row.2}}"
+                                            data-author="{{row.3}}" data-publisher="{{row.4}}" data-category="{{row.5}}" data-rack="{{row.6}}" data-quantity="{{row.7}}"
+                                            >Update</a></li>
+
+                                            {%if row.8 == 1 and  row.7 > row.13%}
+                                            <li><a class="dropdown-item " href="/archiveBook/{{row.0}}" >Archive Book</a></li>
+                                            <li><a class="dropdown-item issue_book" href="#" data-book_id="{{row.0}}" data-name="{{row.1}}">Issue Book</a></li>
+                                            {%elif row.8 == 2 and row.7 > row.13%}
+                                            <li><a class="dropdown-item " href="/availableBook/{{row.0}}" >Make Book Available</a></li>
+                                            {%endif%}
+                                            <li><a class="dropdown-item delete" href="#" data-book_id="{{row.0}}">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {%endfor%}
+                      
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<div class="modal fade" id="rack_form_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="" id="modal_title">Add New Book</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rack_form"  action="{{ url_for('insertBook')}}" method="post">
+        
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Book Name: </label>
+                                            <input type="text" class="form-control" id="title" name="title" required placeholder="Enter book title..." />
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">ISBN: </label>
+                                            <input type="text" class="form-control" id="isbn" name="isbn" required placeholder="Enter book ISBN..." />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Author: </label>
+                                            <input type="text" class="form-control" id="author" name="author" required placeholder="Enter book Author..." />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Publisher: </label>
+                                            <input type="text" class="form-control" id="publisher" name="publisher" required placeholder="Enter book Publisher..." />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Category: </label>
+                                            <select class="form-select" id="category" name="category" >
+                                                {% for cat in category %}
+                                                <option value="{{cat.0}}">{{cat.1}}</option>
+
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Rack: </label>
+                                            <select class="form-select" id="rack" name="rack" >
+                                                {% for data in rack %}
+                                                <option value="{{data.0}}">{{data.1}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Quantity: </label>
+                                            <input type="number" class="form-control" id="quantity" name="quantity" required placeholder="Enter book Quantity..." />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div style="padding:0 0 20px 0;">
+                                    <div class="row justify-content-end">
+                                        <div class="col-12 text-end">
+                                            <input type="submit" class="btn btn-primary" id="modal_add_submit" value="Add Book">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="update_book_form_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="" id="modal_title">Update Book</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update_rack_form"  action="{{ url_for('updateBook')}}" method="post">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <input type="hidden" class="form-control" id="book_id" name="book_id" />
+
+                                            <label for="title" class="form-label">Book Name: </label>
+                                            <input type="text" class="form-control" id="title1" name="title1" required placeholder="Enter book title..." />
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">ISBN: </label>
+                                            <input type="text" class="form-control" id="isbn1" name="isbn1" required placeholder="Enter book ISBN..." />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Author: </label>
+                                            <input type="text" class="form-control" id="author1" name="author1" required placeholder="Enter book Author..." />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Publisher: </label>
+                                            <input type="text" class="form-control" id="publisher1" name="publisher1" required placeholder="Enter book Publisher..." />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Category: </label>
+                                            <select class="form-select" id="category1" name="category1" >
+                                                {% for cat in category %}
+                                                <option value="{{cat.0}}">{{cat.1}}</option>
+
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Rack: </label>
+                                            <select class="form-select" id="rack1" name="rack1" >
+                                                {% for data in rack %}
+                                                <option value="{{data.0}}">{{data.1}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Quantity: </label>
+                                            <input type="number" class="form-control" id="quantity1" name="quantity1" required placeholder="Enter book Quantity..." />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div style="padding:0 0 20px 0;">
+                                    <div class="row justify-content-end">
+                                        <div class="col-12 text-end">
+                                            <input type="submit" class="btn btn-primary" id="modal_add_submit" value="Update Book">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="issue_book_form_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="" id="issue_title">Issue Book</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id=""  action="{{ url_for('issueBooktoStudent')}}" method="post">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <input type="hidden" class="form-control" id="bookID" name="bookID" />
+                                            <label for="title" class="form-label">Student ID: </label>
+                                            <input type="text" class="form-control" id="number_id" name="number_id" required placeholder="Enter book Student ID..." />
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Fullname: </label>
+                                            <input type="text" class="form-control" id="fullname" name="fullname" required placeholder="Enter Borrower's full name..." />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Expected Return Date: </label>
+                                            <input type="date" class="form-control" id="return_date" name="return_date" required placeholder="Enter book Author..." />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div style="padding:0 0 20px 0;">
+                                    <div class="row justify-content-end">
+                                        <div class="col-12 text-end">
+                                            <input type="submit" class="btn btn-primary" id="modal_add_submit" value="Issue Book">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $('#modal_btn_add_rack').click(function(e) {
+        $('#rack_form_modal').modal('show');
+
+    });
+
+
+    $(document).ready(function() {
+        $(document).on('click', '.update', function() {
+
+            $('#update_book_form_modal').modal('show');
+
+            var id = $(this).data('book_id');
+            var name = $(this).data('name');
+            var isbn = $(this).data('isbn');
+            var author = $(this).data('author');
+            var publisher = $(this).data('publisher');
+            var category = $(this).data('category');
+            var rack = $(this).data('rack');
+            var quantity = $(this).data('quantity');
+            $('#book_id').val(id);
+            $('#title1').val(name);
+            $('#isbn1').val(isbn);
+            $('#author1').val(author);
+            $('#publisher1').val(publisher);
+            $('#category1').val(category);
+            $('#rack1').val(rack);
+            $('#quantity1').val(quantity);
+
+        });
+    });
+
+
+   
+        $(document).on('click', '.issue_book', function() {
+
+            $('#issue_book_form_modal').modal('show');
+            var id = $(this).data('book_id');
+            var name = $(this).data('name');
+            $('#bookID').val(id);
+            $('#issue_title').text('Issue Book: '+ name);
+
+
+        
+        });
+
+
+
+    $(document).on('click', '.delete', function() {
+        var id = $(this).data('book_id');
+    
+        swal({
+            title: "Delete book?",
+            text: "Are you sure you want to delete book? ",
+            icon: "warning",
+            buttons: {
+                cancel: "Cancel",
+                yes: {
+                    text: "Yes",
+                    value: "yes",
+                },
+            },
+        }).then((value) => {
+            if (value === "yes") {
+                $.ajax({
+                    type: "POST",
+                    url: "/deleteBook/" + id, 
+                    success: function(response) {
+                        if (response.code == 200) {
+                            swal({
+                                icon: "success",
+                                title: 'Book Successfully Deleted',
+                                text: " ",
+                                timer: 2000,
+                                showConfirmButton: false,
+                            }).then(function() {
+                                window.location.href = "/books"; 
+                            });
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        alert("Error deleting book");
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    });
+    
+</script>
+
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %} Issued Books {% endblock %}
+{% block title1 %} Issued Books {% endblock %}
+{% block content %}
+
+
+
+<script>
+    $(document).ready(function() {
+        $('#table').DataTable();
+    });
+</script>
+
+<style>
+    body {
+        background-color: var(--body-color);
+    }
+
+    td {
+        text-align: left;
+    }
+</style>
+
+<div class="container-fluid" style="padding: 20px;">
+    <div class="card border p-5 m-2">
+        <div class="row">
+            <div class="col-12">
+
+                {%with messages = get_flashed_messages(with_categories=true)%}
+                    {%if messages%}
+                        {% for category, context in messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{context}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        {%endfor%}
+                    {%endif%}
+                {%endwith%}
+
+
+               
+
+        
+                <br>
+                <table id="table" class="table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>ISBN</th>
+                            <th>Student ID No.</th>	
+                            <th>Student Name</th>
+                            <th>Expected Return Date</th>
+                            <th>Issuance Date</th>		
+                            <th>Status</th>		
+                            <th width="50">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                        {% for row in books %}
+                        <tr>
+
+                            <td>{{row.8}}</td>
+                            <td>{{row.9}}</td>
+                            <td>{{row.2}}</td>
+                            <td>{{row.3}}</td>
+                            <td>{{row.4}}</td>
+                            <td>{{row.6}}</td>
+                        
+                            <td> 
+                                {%if row.5 == 2%}
+                                Returned on {{row.7}}
+                                {%elif current_date > row.4 %}
+                                Overdue
+                                {%elif row.5 == 1%}
+                                 Issued
+                               
+                                {%endif%}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+
+                                    <i class="dropdown-toggle fa-solid fa-gears" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    </i>
+                                    <ul class="dropdown-menu">
+                                        {%if row.5 != 2%}
+                                        <li><a class="dropdown-item " href="/returnBook/{{row.0}}" >Book Returned</a></li>
+                                        {%endif%}
+                                            <li><a class="dropdown-item delete" href="#" data-book_id="{{row.0}}">Delete Record</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {%endfor%}
+                      
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+    $(document).on('click', '.delete', function() {
+        var id = $(this).data('book_id');
+    
+        swal({
+            title: "Delete Record?",
+            text: "Are you sure you want to delete record? ",
+            icon: "warning",
+            buttons: {
+                cancel: "Cancel",
+                yes: {
+                    text: "Yes",
+                    value: "yes",
+                },
+            },
+        }).then((value) => {
+            if (value === "yes") {
+                $.ajax({
+                    type: "POST",
+                    url: "/deleteIssued/" + id, 
+                    success: function(response) {
+                        if (response.code == 200) {
+                            swal({
+                                icon: "success",
+                                title: 'Record Successfully Deleted',
+                                text: " ",
+                                timer: 2000,
+                                showConfirmButton: false,
+                            }).then(function() {
+                                window.location.href = "/issued"; 
+                            });
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        alert("Error deleting record");
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    });
+    
+</script>
+
+{% endblock %}
